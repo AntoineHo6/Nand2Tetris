@@ -3,7 +3,6 @@
 
 std::string Code::dest(const std::string& mnemonic) {
     static const std::unordered_map<std::string, std::string> destMap = {
-        {"null", "000"},
         {"M", "001"},
         {"D", "010"},
         {"DM", "011"},
@@ -13,10 +12,9 @@ std::string Code::dest(const std::string& mnemonic) {
         {"ADM", "111"}
     };
 
-    // this assumes that mnemonic will always be valid
     auto res = destMap.find(mnemonic);
 
-    return res->second; 
+    return res != destMap.end() ? res->second : "000";
 };
 
 std::string Code::comp(const std::string& mnemonic) {
@@ -40,7 +38,6 @@ std::string Code::comp(const std::string& mnemonic) {
         {"A-D", "0000111"},
         {"D&A", "0000000"},
         {"D|A", "0010101"},
-
         // a=1 computation instructions (uses M instead of A)
         {"M",   "1110000"},
         {"!M",  "1110001"},
@@ -59,3 +56,19 @@ std::string Code::comp(const std::string& mnemonic) {
 
     return res->second; 
 }
+
+std::string Code::jump(const std::string& mnemonic) {
+    static const std::unordered_map<std::string, std::string> jumpMap = {
+        {"JGT", "001"},
+        {"JEQ", "010"},
+        {"JGE", "011"},
+        {"JLT", "100"},
+        {"JNE", "101"},
+        {"JLE", "110"},
+        {"JMP", "111"}
+    };
+
+    auto res = jumpMap.find(mnemonic);
+
+    return res != jumpMap.end() ? res->second : "000";
+};
