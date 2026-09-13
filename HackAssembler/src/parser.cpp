@@ -47,12 +47,12 @@ void Parser::advance() {
     while (std::getline(file, line)) {
         size_t posFirstChar = line.find_first_not_of(" \t\r\n"); 
         
-        // #1: skip empty lines and comment lines
+        // skip empty lines and comment lines
         if (posFirstChar == std::string::npos || line.compare(posFirstChar, 2, "//") == 0) {
             continue;
         }
 
-        // #2: If asm line, do the following:
+        // if asm line, do the following:
         line.erase(0, posFirstChar);    // Trim whitespace left
 
         trimInlineComment(line);
