@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/src/main",
-            "args": ["../asm/mult.asm"],
+            "args": ["${workspaceFolder}/asm/add.asm"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
