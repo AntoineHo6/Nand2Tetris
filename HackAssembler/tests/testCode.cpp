@@ -34,7 +34,7 @@ TEST_CASE("Testing Code::comp()") {
         Parser parser(testPath);
 
         parser.advance();
-        CHECK(Code::comp(parser.comp()) == "0011011");
+        CHECK(Code::comp(parser.comp()) == "0110111");
     };
 };
 
