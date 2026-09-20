@@ -12,7 +12,7 @@ void createTestFile(const std::string& filename, const std::string& content) {
 TEST_CASE("Testing Code::dest()") {
     SUBCASE("Extracts dest mnemonic into it's binary equivalent") {
         std::string testPath = "codeDestTests.asm";
-        createTestFile(testPath, "DM=A+1\nD-1");
+        createTestFile(testPath, "MD=A+1\nD-1");
 
         Parser parser(testPath);
 
@@ -29,7 +29,7 @@ TEST_CASE("Testing Code::comp()") {
     // comp is mandatory, so we don't test if it's empty.
     SUBCASE("Extracts comp mnemonic into it's binary equivalent") {
         std::string testPath = "codeCompTests.asm";
-        createTestFile(testPath, "DM=A+1\n");
+        createTestFile(testPath, "MD=A+1\n");
 
         Parser parser(testPath);
 
@@ -42,7 +42,7 @@ TEST_CASE("Testing Code::comp()") {
 TEST_CASE("Testing Code::jump()") {
     SUBCASE("Extracts jump mnemonic into it's binary equivalent") {
         std::string testPath = "codeJumpTests.asm";
-        createTestFile(testPath, "DM=A+1;JGT\nD-1");
+        createTestFile(testPath, "MD=A+1;JGT\nD-1");
 
         Parser parser(testPath);
 
