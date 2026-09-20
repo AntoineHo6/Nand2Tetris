@@ -37,7 +37,7 @@ bool SymbolTable::contains(const std::string& symbol) const {
 }
 
 /*
-    Assumes the symbol always exists
+    Assumes the symbol exists
 */
 int SymbolTable::getAddress(const std::string& symbol) const {
     auto got = table.find(symbol);

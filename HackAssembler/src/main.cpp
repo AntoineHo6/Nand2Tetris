@@ -9,40 +9,12 @@
 #include "code.cpp"
 #include "symbolTable.cpp"
 
-std::string instrToBinary(SymbolTable& symbolTable, const Parser& parser) {
-    std::string binaryLine;
-        switch(parser.instructionType()) {
-            case InstrType::A_INSTRUCTION: {
-                if (symbolTable.contains(parser.symbol())) {
-                    int address = symbolTable.getAddress(parser.symbol());
-                    binaryLine = "0" + std::bitset<15>(address).to_string();
-                }
-                else if (isdigit(parser.getInstr().at(0))) {
-                    int value = std::stoi(parser.symbol());
-                    binaryLine = "0" + std::bitset<15>(value).to_string();
-                }
-                else {
 
-                }
-
-                break;
-            }
-            case InstrType::C_INSTRUCTION: {
-                binaryLine = "111" + Code::comp(parser.comp())
-                                   + Code::dest(parser.dest()) 
-                                   + Code::jump(parser.jump());
-                break;                
-            }
-            case InstrType::L_INSTRUCTION: {
-                // TODO
-                binaryLine = "";
-                break;
-            }
-        }
-    
-    return binaryLine;
-}
-
+/*
+    The first pass will add all LABEL symbols to the Symbol Table.
+    The address of LABEL symbols is the line number at which the label is located at.
+    e.g: if (LOOP) is located on line 10 of the file, then it's address will be 10.
+*/
 void firstPass(SymbolTable& symbolTable, const std::string& filePath) {
     Parser parser(filePath);
 
@@ -59,6 +31,11 @@ void firstPass(SymbolTable& symbolTable, const std::string& filePath) {
     }
 }
 
+
+/*
+    The second pass will convert every assembly line into it's corresponding 16 bit binary form.
+    Addresses for the first variable starts at RAM[16]. The second RAM[17] and so on. 
+*/
 int secondPass(SymbolTable& symbolTable, const std::string& filePath) {
     Parser parser(filePath);
 
@@ -108,8 +85,6 @@ int secondPass(SymbolTable& symbolTable, const std::string& filePath) {
                 continue;
             }
         }
-
-        // hackFile << binaryLine << '\n';
     }
 
     return 0;
