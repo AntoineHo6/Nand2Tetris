@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <string_view>
 #include <fstream>
 
 enum class CommandType {
@@ -20,10 +20,11 @@ class Parser {
         bool hasMoreLines();
         void advance();
         CommandType commandType();
-        std::string arg1();
+        std::string_view arg1();
         int arg2();
+        std::string_view getCommand();
         
     private:
         std::ifstream file;
-        std::string instr;
+        std::string command;
 };

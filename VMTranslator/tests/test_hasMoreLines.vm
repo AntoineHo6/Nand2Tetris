@@ -1,0 +1,3 @@
+// VM test file
+ push constant 10
+ add // comment
