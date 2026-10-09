@@ -1,27 +1,10 @@
 #include "../include/parser.hpp"
-#include <fstream>
+// #include <fstream>
 #include <iostream>
 #include <string_view>
+#include <sstream>
+#include <unordered_set>
 
-/*
-    eg: "add //comment" -> "add"
-*/
-void trimInlineComment(std::string& line) {
-    size_t commentPos = line.find("//");
-    if (commentPos != std::string::npos) {
-        line = line.substr(0, commentPos);
-    }
-}
-
-/*
-    eg: "add   " -> "add"
-*/
-void trimTrailWhiteSpace(std::string& line) {
-    size_t endPos = line.find_last_not_of(" \t\r\n");
-    if (endPos != std::string::npos) {
-        line = line.substr(0, endPos + 1);
-    }
-}
 
 Parser::Parser(const std::string& filePath): file(filePath) {
     if (!file.is_open()) {
@@ -41,19 +24,28 @@ void Parser::advance() {
     std::string line;
 
     while (std::getline(file, line)) {
-        size_t posFirstChar = line.find_first_not_of(" \t\r\n"); 
+        size_t start = line.find_first_not_of(" \t\r\n"); 
 
         // skip empty lines and comment lines
-        if (posFirstChar == std::string::npos || line.compare(posFirstChar, 2, "//") == 0) {
+        if (start == std::string::npos || line.compare(start, 2, "//") == 0) {
             continue;
         }
 
         // if vm line, do the following:
-        line.erase(0, posFirstChar);    // Trim whitespace left
+        // 1. Trim inline comments
+        size_t commentPos = line.find("//");
+        if (commentPos != std::string::npos) {
+            line = line.substr(0, commentPos);
+        }
 
-        trimInlineComment(line);
-
-        trimTrailWhiteSpace(line);
+        // 2. trim left
+        line.erase(0, start);
+        
+        // 3. trim right
+        size_t endPos = line.find_last_not_of(" \t\r\n");
+        if (endPos != std::string::npos) {
+            line = line.substr(0, endPos + 1);
+        }
 
         command = line;
 
@@ -61,18 +53,52 @@ void Parser::advance() {
     }
 }
 
-CommandType Parser::commandType() {
-    // std::string_view temp = command;
+// void Parser::advance() {
+//     std::string line;
 
-    size_t start = command.find_first_not_of(" \t\n\r");
-    
-    size_t end = command.find_first_of(" \t\n\r", start);
-    
-    if (end == std::string_view::npos) {
-        
+//     while (std::getline(file, line)) {
+//         size_t commentPos = line.find("//");
+//         if (commentPos != std::string::npos) {
+//             line.erase(commentPos);
+//         }
+
+//         std::string_view sv = line;
+
+//         size_t start = sv.find_first_not_of(" \t\r\n");
+//         if (start == std::string_view::npos) {
+//             continue; // empty or comment line
+//         }
+
+//         size_t end = sv.find_last_not_of(" \t\r\n");
+
+//         command = sv.substr(start, end - start + 1);
+//     }
+// }
+
+CommandType Parser::commandType() {
+    std::stringstream ss(command);
+    std::string firstToken;
+
+    ss >> firstToken;
+
+    static const std::unordered_set<std::string> arithmeticCmds = {
+        "add", "sub", "neg",
+        "eq",  "gt",  "lt",
+        "and", "or",  "not"
+    };
+
+    if (arithmeticCmds.contains(firstToken)) {
+        return CommandType::C_ARITHMETIC;
+    }
+    else if (firstToken == "push") {
+        return CommandType::C_PUSH;
+    }
+    else if (firstToken == "pop") {
+        return CommandType::C_POP;
     }
 
-    // command.substr(start, end - start);
+    // chapter 2 will implement the rest of the commands. For now, return random command type.
+    return CommandType::C_RETURN;
 }
 
 std::string_view Parser::getCommand() {

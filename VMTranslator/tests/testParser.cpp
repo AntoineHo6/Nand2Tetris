@@ -25,3 +25,22 @@ TEST_CASE("Testing Parser::advance()") {
         
     }
 };
+
+TEST_CASE("Testing Parser::commandType()") {
+    SUBCASE("Test extraction of first token") {
+        std::string testPath = "test_hasMoreLines.vm";
+
+        createTestFile(testPath, "add\n push constant 10\n pop argument 2");
+
+        Parser parser(testPath);
+
+        parser.advance();
+        CHECK(parser.commandType() == CommandType::C_ARITHMETIC);
+
+        parser.advance();
+        CHECK(parser.commandType() == CommandType::C_PUSH);
+
+        parser.advance();
+        CHECK(parser.commandType() == CommandType::C_POP);
+    }
+}
