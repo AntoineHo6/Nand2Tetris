@@ -24,56 +24,25 @@ void Parser::advance() {
     std::string line;
 
     while (std::getline(file, line)) {
-        size_t start = line.find_first_not_of(" \t\r\n"); 
-
-        // skip empty lines and comment lines
-        if (start == std::string::npos || line.compare(start, 2, "//") == 0) {
-            continue;
-        }
-
-        // if vm line, do the following:
-        // 1. Trim inline comments
         size_t commentPos = line.find("//");
         if (commentPos != std::string::npos) {
-            line = line.substr(0, commentPos);
+            line.erase(commentPos);
         }
 
-        // 2. trim left
-        line.erase(0, start);
-        
-        // 3. trim right
-        size_t endPos = line.find_last_not_of(" \t\r\n");
-        if (endPos != std::string::npos) {
-            line = line.substr(0, endPos + 1);
+        std::string_view sv = line;
+
+        size_t start = sv.find_first_not_of(" \t\r\n");
+        if (start == std::string_view::npos) {
+            continue; // empty or comment line
         }
 
-        command = line;
+        size_t end = sv.find_last_not_of(" \t\r\n");
 
-        break;
+        command = sv.substr(start, end - start + 1);
+        return;
     }
 }
 
-// void Parser::advance() {
-//     std::string line;
-
-//     while (std::getline(file, line)) {
-//         size_t commentPos = line.find("//");
-//         if (commentPos != std::string::npos) {
-//             line.erase(commentPos);
-//         }
-
-//         std::string_view sv = line;
-
-//         size_t start = sv.find_first_not_of(" \t\r\n");
-//         if (start == std::string_view::npos) {
-//             continue; // empty or comment line
-//         }
-
-//         size_t end = sv.find_last_not_of(" \t\r\n");
-
-//         command = sv.substr(start, end - start + 1);
-//     }
-// }
 
 CommandType Parser::commandType() {
     std::stringstream ss(command);
