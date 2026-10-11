@@ -1,9 +1,36 @@
 #include "../include/parser.hpp"
-// #include <fstream>
 #include <iostream>
 #include <string_view>
-#include <sstream>
-#include <unordered_set>
+
+// #include <algorithm>
+#include <array>
+
+namespace {
+    std::string_view getToken(std::string_view sv, int index) {
+        size_t pos = 0;
+    
+        for (int i = 0; i <= index; ++i) {
+            // 1. Skip leading whitespace to find the start of the token
+            pos = sv.find_first_not_of(" \t", pos);
+            if (pos == std::string_view::npos) return {}; // Index out of bounds
+
+            // 2. Find where this token ends (next whitespace or end of string)
+            size_t end = sv.find_first_of(" \t", pos);
+
+            // 3. If this is the target index, return the slice
+            if (i == index) {
+                return (end == std::string_view::npos) 
+                        ? sv.substr(pos) 
+                        : sv.substr(pos, end - pos);
+            }
+
+            // Otherwise, move past this token for the next iteration
+            pos = end;
+        }
+        
+        return {};
+    }
+}
 
 
 Parser::Parser(const std::string& filePath): file(filePath) {
@@ -11,6 +38,7 @@ Parser::Parser(const std::string& filePath): file(filePath) {
         std::cerr << "Error: Could not open file " << filePath << std::endl;
     }
 }
+
 
 bool Parser::hasMoreLines() {
     return file.peek() != EOF;
@@ -45,30 +73,52 @@ void Parser::advance() {
 
 
 CommandType Parser::commandType() {
-    std::stringstream ss(command);
-    std::string firstToken;
+    std::string_view sv = command;
 
-    ss >> firstToken;
+    std::string_view token1 = getToken(sv, 0);
 
-    static const std::unordered_set<std::string> arithmeticCmds = {
+    static constexpr std::array<std::string_view, 9> arithmeticCmds = {
         "add", "sub", "neg",
         "eq",  "gt",  "lt",
         "and", "or",  "not"
     };
 
-    if (arithmeticCmds.contains(firstToken)) {
+    std::string token1str{token1};
+    if (std::ranges::find(arithmeticCmds, token1) != arithmeticCmds.end()) {
         return CommandType::C_ARITHMETIC;
     }
-    else if (firstToken == "push") {
+    else if (token1 == "push") {
         return CommandType::C_PUSH;
     }
-    else if (firstToken == "pop") {
+    else if (token1 == "pop") {
         return CommandType::C_POP;
     }
 
     // chapter 2 will implement the rest of the commands. For now, return random command type.
     return CommandType::C_RETURN;
 }
+
+
+std::string_view Parser::arg1() {
+    std::string_view sv = command;
+    
+    switch(commandType()) {
+        case CommandType::C_ARITHMETIC:
+            return command;
+        case CommandType::C_POP:
+        case CommandType::C_PUSH:
+            return getToken(sv, 1);
+        default:    // implement the rest in chap 2
+            return "boop";
+    }
+}
+
+
+int Parser::arg2() {
+    // TODO
+    return 0;
+}
+
 
 std::string_view Parser::getCommand() {
     return command;
